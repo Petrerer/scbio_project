@@ -3,9 +3,9 @@ import numpy as np
 import os
 
 # Counters for saving images
-rock_count = 0
-paper_count = 0
-scissors_count = 0
+rock_count = 130
+paper_count = 130
+scissors_count = 130
 
 # Create folders if they don't exist
 os.makedirs("dataset/rock", exist_ok=True)
