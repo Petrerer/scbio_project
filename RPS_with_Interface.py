@@ -16,14 +16,14 @@ ties_score = 0
 machine_score = 0
 
 # Series-related variables
-mode_max_rounds = 0
-user_wins_in_series = 0
-machine_wins_in_series = 0
+mode_rounds = 0
+user_wins_series = 0
+machine_wins_series = 0
 series_mode = False
 
 # Create main window
 root = tk.Tk()
-root.title("Rock Paper Scissors - Camera Game")
+root.title("Rock, Paper, Scissors Game")
 root.geometry("800x600")
 
 # Load and place background image
@@ -54,28 +54,31 @@ label_score_values = Label(content_frame, text="🧟 You: 0   ⚖️ Ties: 0   �
 label_score_values.pack(pady=5)
 
 # Game mode selector
-def set_game_mode(val):
-    global mode_max_rounds, user_wins_in_series, machine_wins_in_series, series_mode
-    global user_score, ties_score, machine_score
-    user_score = ties_score = machine_score = 0
-    user_wins_in_series = machine_wins_in_series = 0
+def game_mode(val):
+    global mode_rounds, user_wins_series, machine_wins_series, series_mode, user_score, ties_score, machine_score
+    user_score = 0
+    ties_score = 0
+    machine_score = 0
+    user_wins_series = 0
+    machine_wins_series = 0
     update_score()
     if val == "Single Match":
         series_mode = False
-        mode_max_rounds = 0
+        mode_rounds = 0
         label_result.config(text="Mode: Single Match")
     else:
         series_mode = True
-        mode_max_rounds = int(val)
-        user_wins_in_series = machine_wins_in_series = 0
-        label_result.config(text=f"Mode: Best of {mode_max_rounds}")
+        mode_rounds = int(val)
+        user_wins_series = 0
+        machine_wins_series = 0
+        label_result.config(text=f"Mode: Best of {mode_rounds}")
 
 mode_frame = tk.Frame(content_frame, bg="white")
 mode_frame.pack(pady=5)
 tk.Label(mode_frame, text="Mode:", font=("Arial", 12), bg="white").pack(side=tk.LEFT)
 mode_option = tk.StringVar(root)
 mode_option.set("Single Match")
-mode_menu = tk.OptionMenu(mode_frame, mode_option, "Single Match", "3", "5", "10", command=set_game_mode)
+mode_menu = tk.OptionMenu(mode_frame, mode_option, "Single Match", "3", "5", "10", command=game_mode)
 mode_menu.config(font=("Arial", 12))
 mode_menu.pack(side=tk.LEFT)
 
@@ -106,9 +109,7 @@ def flash_result(color):
 
 # Play the game
 def play():
-    global user_score, ties_score, machine_score
-    global user_wins_in_series, machine_wins_in_series
-
+    global user_score, ties_score, machine_score, user_wins_series, machine_wins_series
     ret, frame = cap.read()
     if not ret:
         label_result.config(text="Camera error")
@@ -121,32 +122,32 @@ def play():
         result = "It's a tie!"
         ties_score += 1
         flash_result("#e2e3e5")
-    elif (player == "rock" and machine == "scissors") or \
-         (player == "scissors" and machine == "paper") or \
-         (player == "paper" and machine == "rock"):
+    elif (player == "rock" and machine == "scissors") or (player == "scissors" and machine == "paper") or (player == "paper" and machine == "rock"):
         result = "You Win! 🎉"
         user_score += 1
         flash_result("#28a745")
         if series_mode:
-            user_wins_in_series += 1
+            user_wins_series += 1
     else:
         result = "You Lose 😞"
         machine_score += 1
         flash_result("#dc3545")
         if series_mode:
-            machine_wins_in_series += 1
+            machine_wins_series += 1
 
     label_result.config(text=f"You: {player} | Machine: {machine}\n{result}")
     update_score()
 
     if series_mode:
-        half = mode_max_rounds // 2 + 1
-        if user_wins_in_series == half:
-            label_result.config(text=f"You won the best of {mode_max_rounds}! 🏆")
-            user_wins_in_series = machine_wins_in_series = 0
-        elif machine_wins_in_series == half:
-            label_result.config(text=f"Machine won the best of {mode_max_rounds} 😔")
-            user_wins_in_series = machine_wins_in_series = 0
+        half = mode_rounds // 2 + 1
+        if user_wins_series == half:
+            label_result.config(text=f"You won the best of {mode_rounds}! 🏆")
+            user_wins_series = 0
+            machine_wins_series = 0
+        elif machine_wins_series == half:
+            label_result.config(text=f"Machine won the best of {mode_rounds} 😔")
+            user_wins_series = 0
+            machine_wins_series = 0
 
 # Countdown to begin the game
 def countdown(seconds=3):
@@ -158,10 +159,12 @@ def countdown(seconds=3):
 
 # Reset de score
 def reset_score():
-    global user_score, ties_score, machine_score
-    global user_wins_in_series, machine_wins_in_series
-    user_score = ties_score = machine_score = 0
-    user_wins_in_series = machine_wins_in_series = 0
+    global user_score, ties_score, machine_score, user_wins_series, machine_wins_series
+    user_score = 0
+    ties_score = 0
+    machine_score = 0
+    user_wins_series = 0
+    machine_wins_series = 0
     update_score()
     label_result.config(text="Score reset")
 
@@ -197,14 +200,14 @@ def update_video():
 buttons_frame = tk.Frame(content_frame, bg="white")
 buttons_frame.pack(pady=10)
 
-btn_play = Button(buttons_frame, text="📷 Play", font=("Arial", 12), bg="#4CAF50", fg="white", command=countdown)
-btn_play.pack(side=tk.LEFT, padx=10)
+button_play = Button(buttons_frame, text="📷 Play", font=("Arial", 12), bg="#4CAF50", fg="white", command=countdown)
+button_play.pack(side=tk.LEFT, padx=10)
 
-btn_reset = Button(buttons_frame, text="🔄 Reset", font=("Arial", 12), bg="#FFC107", command=reset_score)
-btn_reset.pack(side=tk.LEFT, padx=10)
+button_reset = Button(buttons_frame, text="🔄 Reset", font=("Arial", 12), bg="#FFC107", command=reset_score)
+button_reset.pack(side=tk.LEFT, padx=10)
 
-btn_exit = Button(buttons_frame, text="🚪 Exit", font=("Arial", 12), bg="#F44336", fg="white", command=close)
-btn_exit.pack(side=tk.LEFT, padx=10)
+button_exit = Button(buttons_frame, text="🚪 Exit", font=("Arial", 12), bg="#F44336", fg="white", command=close)
+button_exit.pack(side=tk.LEFT, padx=10)
 
 # Start video loop
 update_video()
