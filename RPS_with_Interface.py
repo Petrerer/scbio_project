@@ -27,10 +27,27 @@ root.title("Rock, Paper, Scissors Game")
 root.geometry("800x600")
 
 # Load and place background image
-background_image = Image.open("background_image.jpg").resize((2000, 1000))
+background_image = Image.open("images/background_image.jpg").resize((2000, 1000))
+
 background_photo = ImageTk.PhotoImage(background_image)
 background_label = Label(root, image=background_photo)
 background_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+rock = Image.open("images/rock.jpg").resize((600, 600))
+paper = Image.open("images/paper.jpg").resize((600, 600))
+scissors = Image.open("images/scissors.jpg").resize((600, 600))
+
+# Convert to PhotoImage objects for Tkinter
+rock_photo = ImageTk.PhotoImage(rock)
+paper_photo = ImageTk.PhotoImage(paper)
+scissors_photo = ImageTk.PhotoImage(scissors)
+
+# Store in a dictionary for easy access
+gesture_images = {
+    'rock': rock_photo,
+    'paper': paper_photo,
+    'scissors': scissors_photo
+}
 
 # Main content frame
 content_frame = tk.Frame(root, bg='white')
@@ -39,6 +56,10 @@ content_frame.place(relx=0.5, rely=0.5, anchor='center')
 # Video label
 label_video = Label(content_frame)
 label_video.pack()
+
+label_image = Label(content_frame)
+label_image.place(x=0, y=0, relwidth=1, relheight=1)
+label_image.lower()
 
 # Result label in a separate frame to isolate background color
 result_frame = tk.Frame(content_frame, bg="white")
@@ -102,10 +123,19 @@ def update_score():
     label_score_values.config(text=f"🧟 You: {user_score}   ⚖️ Ties: {ties_score}   💻 Machine: {machine_score}")
 
 # Flash background with color
-def flash_result(color):
+def flash_result(color, img):
     background_label.config(image='', bg=color)
-    label_result.config(bg='white')  # mantener el recuadro del texto blanco
-    root.after(500, lambda: background_label.config(image=background_photo))
+
+    # Show gesture image
+    label_image.config(image=img)
+    label_image.image = img
+    label_image.lift()  # Bring to front to cover camera
+
+    # Restore camera feed after 1 second
+    root.after(1000, lambda: label_image.lower())
+
+    label_result.config(bg='white')
+    root.after(1000, lambda: background_label.config(image=background_photo))
 
 # Play the game
 def play():
@@ -121,17 +151,17 @@ def play():
     if player == machine:
         result = "It's a tie!"
         ties_score += 1
-        flash_result("#e2e3e5")
+        flash_result("#e2e3e5", gesture_images[machine])
     elif (player == "rock" and machine == "scissors") or (player == "scissors" and machine == "paper") or (player == "paper" and machine == "rock"):
         result = "You Win! 🎉"
         user_score += 1
-        flash_result("#28a745")
+        flash_result("#28a745", gesture_images[machine])
         if series_mode:
             user_wins_series += 1
     else:
         result = "You Lose 😞"
         machine_score += 1
-        flash_result("#dc3545")
+        flash_result("#dc3545", gesture_images[machine])
         if series_mode:
             machine_wins_series += 1
 
